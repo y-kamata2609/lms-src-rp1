@@ -2,6 +2,7 @@ package jp.co.sss.lms.service;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
+import jp.co.sss.lms.dto.StudentAttendanceDto;
 import jp.co.sss.lms.entity.TStudentAttendance;
 import jp.co.sss.lms.enums.AttendanceStatusEnum;
 import jp.co.sss.lms.form.AttendanceForm;
@@ -333,5 +335,39 @@ public class StudentAttendanceService {
 		// 完了メッセージ
 		return messageUtil.getMessage(Constants.PROP_KEY_ATTENDANCE_UPDATE_NOTICE);
 	}
+
+	//以下修正分task25
+		/**
+		* 過去の未入力件数を取得
+		* 
+		* @param courseId コースID
+		* @param lmsUserId LMSユーザーID
+		* @return 過去の未入力件数
+		*/
+		public int countUnfilledPast(List<AttendanceManagementDto> list, Date today) {
+			int count = 0;
+			
+			Calendar cal = Calendar.getInstance();
+		    cal.setTime(today);
+		    cal.add(Calendar.DAY_OF_MONTH, -1); // 1日前
+		    Date yesterday = cal.getTime();
+
+			for (StudentAttendanceDto dto : list) {
+				// 今日より過去の日付
+				if (dto.getTrainingDate().before(yesterday)) {
+					System.out.println("trainingDate: " +  dto.getTrainingDate());
+					System.out.println("yesterday: " +  yesterday);
+					boolean startEmpty = dto.getTrainingStartTime() == null || dto.getTrainingStartTime().isEmpty();
+					boolean endEmpty = dto.getTrainingEndTime() == null || dto.getTrainingEndTime().isEmpty();
+
+					if (startEmpty || endEmpty) {
+						count++; // 未入力をカウント
+					}
+				}
+			}
+
+			return count;
+		}
+
 
 }

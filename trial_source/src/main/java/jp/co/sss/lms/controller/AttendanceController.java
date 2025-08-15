@@ -1,6 +1,7 @@
 package jp.co.sss.lms.controller;
 
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +38,9 @@ public class AttendanceController {
 	 * @param courseId
 	 * @param model
 	 * @return 勤怠管理画面
-	 * @throws ParseException
+//	 * @throws ParseException
 	 */
+	
 	@RequestMapping(path = "/detail", method = RequestMethod.GET)
 	public String index(Model model) {
 
@@ -46,6 +48,11 @@ public class AttendanceController {
 		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
 				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
+
+		// 今日・過去の未入力件数の取得
+		Date today = new Date();
+		int unfilledPastCount = studentAttendanceService.countUnfilledPast(attendanceManagementDtoList, today);
+		model.addAttribute("unfilledPastCount", unfilledPastCount);
 
 		return "attendance/detail";
 	}
