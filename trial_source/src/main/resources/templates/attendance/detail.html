@@ -90,15 +90,14 @@
 		}
 	</script>
 
-
 	<!--		以下task25加筆分-->
 	<script th:inline="javascript">
-		/*<![CDATA[*/
-		var unfilledPastCount = /*[[${unfilledPastCount}]]*/ 0;
-		if (unfilledPastCount > 0) {
-			alert("過去日の勤怠に未入力があります。");
-		}
-		/*]]>*/
+		window.onload = function () {
+			var showAlert = /*[[${showUnfilledPastAlert}]]*/ false;
+			if (showAlert) {
+				alert("過去日の勤怠に未入力があります。");
+			}
+		};
 	</script>
 
 </body>

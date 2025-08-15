@@ -1,6 +1,7 @@
 package jp.co.sss.lms.service;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -337,37 +338,55 @@ public class StudentAttendanceService {
 	}
 
 	//以下修正分task25
-		/**
-		* 過去の未入力件数を取得
-		* 
-		* @param courseId コースID
-		* @param lmsUserId LMSユーザーID
-		* @return 過去の未入力件数
-		*/
-		public int countUnfilledPast(List<AttendanceManagementDto> list, Date today) {
-			int count = 0;
-			
-			Calendar cal = Calendar.getInstance();
-		    cal.setTime(today);
-		    cal.add(Calendar.DAY_OF_MONTH, -1); // 1日前
-		    Date yesterday = cal.getTime();
+	/**
+	* 過去の未入力件数を取得
+	* 
+	* @param courseId コースID
+	* @param lmsUserId LMSユーザーID
+	* @return 過去の未入力件数
+	*/
+	public int countUnfilledPast(List<AttendanceManagementDto> list, Date today) {
+		int count = 0;
 
-			for (StudentAttendanceDto dto : list) {
-				// 今日より過去の日付
-				if (dto.getTrainingDate().before(yesterday)) {
-					System.out.println("trainingDate: " +  dto.getTrainingDate());
-					System.out.println("yesterday: " +  yesterday);
-					boolean startEmpty = dto.getTrainingStartTime() == null || dto.getTrainingStartTime().isEmpty();
-					boolean endEmpty = dto.getTrainingEndTime() == null || dto.getTrainingEndTime().isEmpty();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(today);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
 
-					if (startEmpty || endEmpty) {
-						count++; // 未入力をカウント
-					}
+		Date truncatedToday = cal.getTime();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+		for (StudentAttendanceDto dto : list) {
+			//テスト用の出力
+			System.out.println("today(比較用)       : " + sdf.format(truncatedToday));
+			System.out.println("dto.getTrainingDate: " + sdf.format(dto.getTrainingDate()));
+
+			// 今日より過去の日付
+			if (dto.getTrainingDate().before(truncatedToday)) {
+
+				boolean startEmpty = dto.getTrainingStartTime() == null || dto.getTrainingStartTime().isEmpty();
+				boolean endEmpty = dto.getTrainingEndTime() == null || dto.getTrainingEndTime().isEmpty();
+
+				if (startEmpty || endEmpty) {
+					count++;
 				}
 			}
-
-			return count;
 		}
 
+		return count;
+	}
+
+	/**
+	 * 過去の未入力が存在するかを判定
+	 *
+	 * @param list 勤怠情報リスト
+	 * @param today 今日の日付
+	 * @return true = 未入力あり, false = 未入力なし
+	 */
+	public boolean hasUnfilledPast(List<AttendanceManagementDto> list, Date today) {
+		return countUnfilledPast(list, today) > 0;
+	}
 
 }

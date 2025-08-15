@@ -50,8 +50,14 @@ public class AttendanceController {
 
 		// 今日・過去の未入力件数の取得
 		Date today = new Date();
-		int unfilledPastCount = studentAttendanceService.countUnfilledPast(attendanceManagementDtoList, today);
-		model.addAttribute("unfilledPastCount", unfilledPastCount);
+//		int unfilledPastCount = studentAttendanceService.countUnfilledPast(attendanceManagementDtoList, today);
+//		model.addAttribute("unfilledPastCount", unfilledPastCount);
+		
+		 // Service で未入力があるかを boolean 判定
+	    boolean showUnfilledPastAlert = studentAttendanceService.hasUnfilledPast(attendanceManagementDtoList, today);
+	    model.addAttribute("showUnfilledPastAlert", showUnfilledPastAlert);
+		
+		
 
 		return "attendance/detail";
 	}
