@@ -40,7 +40,6 @@ public class AttendanceController {
 	 * @return 勤怠管理画面
 //	 * @throws ParseException
 	 */
-	
 	@RequestMapping(path = "/detail", method = RequestMethod.GET)
 	public String index(Model model) {
 
