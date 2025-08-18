@@ -146,5 +146,39 @@ public class AttendanceUtil {
 		}
 		return false;
 	}
+	//task26分
+	/**
+	 * 時間（0-23時）のプルダウン用データ取得
+	 *
+	 * @return 時間のマップ
+	 */
+	public LinkedHashMap<String, String> setWorkHour() {
+	    LinkedHashMap<String, String> map = new LinkedHashMap<>();
+	    map.put("", "");
+	    
+	    for (int hour = 0; hour < 24; hour++) {
+	        String hourKey = String.format("%02d", hour);
+	        String hourValue = String.format("%02d", hour);
+	        map.put(hourKey, hourValue);
+	    }
+	    return map;
+	}
+
+	/**
+	 * 分（0-59分）のプルダウン用データ取得
+	 *
+	 * @return 分のマップ
+	 */
+	public LinkedHashMap<String, String> setWorkMinute() {
+	    LinkedHashMap<String, String> map = new LinkedHashMap<>();
+	    map.put("", "");
+	    
+	    for (int minute = 0; minute < 60; minute++) {
+	        String minuteKey = String.format("%02d", minute);
+	        String minuteValue = String.format("%02d", minute);
+	        map.put(minuteKey, minuteValue);
+	    }
+	    return map;
+	}
 
 }

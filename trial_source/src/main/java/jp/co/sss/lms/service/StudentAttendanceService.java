@@ -222,6 +222,16 @@ public class StudentAttendanceService {
 		attendanceForm.setUserName(loginUserDto.getUserName());
 		attendanceForm.setLeaveFlg(loginUserDto.getLeaveFlg());
 		attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
+		//task26修正分
+		attendanceForm.setWorkHour(attendanceUtil.setWorkHour());     // 新規追加
+		attendanceForm.setWorkMinute(attendanceUtil.setWorkMinute()); // 新規追加   
+		
+		//デバッグログ追加、後で消す
+		System.out.println("=== DEBUG INFO ===");
+	    System.out.println("WorkHour map size: " + attendanceForm.getWorkHour().size());
+	    System.out.println("WorkMinute map size: " + attendanceForm.getWorkMinute().size());
+	    System.out.println("WorkHour first few entries: " + attendanceForm.getWorkHour().entrySet().stream().limit(3).toList());
+	    System.out.println("WorkMinute first few entries: " + attendanceForm.getWorkMinute().entrySet().stream().limit(3).toList());
 
 		// 途中退校している場合のみ設定
 		if (loginUserDto.getLeaveDate() != null) {
@@ -241,6 +251,12 @@ public class StudentAttendanceService {
 			dailyAttendanceForm
 					.setTrainingStartTime(attendanceManagementDto.getTrainingStartTime());
 			dailyAttendanceForm.setTrainingEndTime(attendanceManagementDto.getTrainingEndTime());
+			
+			//デバッグログ
+			System.out.println("Before split - StartTime: " + dailyAttendanceForm.getTrainingStartTime());
+	        System.out.println("Before split - EndTime: " + dailyAttendanceForm.getTrainingEndTime());
+	        
+			
 			if (attendanceManagementDto.getBlankTime() != null) {
 				dailyAttendanceForm.setBlankTime(attendanceManagementDto.getBlankTime());
 				dailyAttendanceForm.setBlankTimeValue(String.valueOf(
@@ -253,10 +269,24 @@ public class StudentAttendanceService {
 			dailyAttendanceForm.setDispTrainingDate(dateUtil
 					.dateToString(attendanceManagementDto.getTrainingDate(), "yyyy年M月d日(E)"));
 			dailyAttendanceForm.setStatusDispName(attendanceManagementDto.getStatusDispName());
+			
+			// 時分に分割 - task26追加分
+	        dailyAttendanceForm.splitTrainingStartTime();
+	        dailyAttendanceForm.splitTrainingEndTime();
+	        
+	        //デバッグログ
+	        System.out.println("After split - StartHour: " + dailyAttendanceForm.getTrainingStartTimeHour());
+	        System.out.println("After split - StartMinute: " + dailyAttendanceForm.getTrainingStartTimeMinute());
+	        System.out.println("After split - EndHour: " + dailyAttendanceForm.getTrainingEndTimeHour());
+	        System.out.println("After split - EndMinute: " + dailyAttendanceForm.getTrainingEndTimeMinute());
+	        System.out.println("---");
 
 			attendanceForm.getAttendanceList().add(dailyAttendanceForm);
 		}
-
+		
+		//デバッグログ
+		System.out.println("=== END DEBUG INFO ===");
+		
 		return attendanceForm;
 	}
 
@@ -280,6 +310,10 @@ public class StudentAttendanceService {
 		Date date = new Date();
 		for (DailyAttendanceForm dailyAttendanceForm : attendanceForm.getAttendanceList()) {
 
+		    // 時分を結合 - 新規追加
+		    dailyAttendanceForm.combineTrainingStartTime();
+		    dailyAttendanceForm.combineTrainingEndTime();
+		    
 			// 更新用エンティティ作成
 			TStudentAttendance tStudentAttendance = new TStudentAttendance();
 			// 日次勤怠フォームから更新用のエンティティにコピー

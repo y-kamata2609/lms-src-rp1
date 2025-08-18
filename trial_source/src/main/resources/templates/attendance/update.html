@@ -4,6 +4,8 @@
 <head>
 	<meta charset="UTF-8">
 	<title>勤怠情報変更｜LMS</title>
+
+	
 </head>
 
 <body>
@@ -55,22 +57,40 @@
 								<td class="w140">[[${dailyAttendanceForm.dispTrainingDate}]]</td>
 								<td class="w300">[[${dailyAttendanceForm.sectionName}]]</td>
 								<td class="w70">
-									<select th:name="|attendanceList[${stat.index}].trainingStartTime|"
-										class="form-control">
-										<option th:each="time : ${attendanceForm.blankTimes}" th:value="${time.key}"
-											th:text="${time.value}"
-											th:selected="${time.key == dailyAttendanceForm.trainingStartTime}">
-										</option>
-									</select>
+									<div style="display: flex; gap: 5px;">
+										<select th:name="|attendanceList[${stat.index}].trainingStartTimeHour|"
+											class="form-control" style="width: 48%; display: inline-block;">
+											<option th:each="hour : ${attendanceForm.workHour}" th:value="${hour.key}"
+												th:text="${hour.value}"
+												th:selected="${hour.key == dailyAttendanceForm.trainingStartTimeHour}">
+											</option>
+										</select>:
+										<select th:name="|attendanceList[${stat.index}].trainingStartTimeMinute|"
+											class="form-control" style="width: 48%;">
+											<option th:each="minute : ${attendanceForm.workMinute}"
+												th:value="${minute.key}" th:text="${minute.value}"
+												th:selected="${minute.key == dailyAttendanceForm.trainingStartTimeMinute}">
+											</option>
+										</select>
+									</div>
 								</td>
 								<td class="w70">
-									<select th:name="|attendanceList[${stat.index}].trainingEndTime|"
-										class="form-control">
-										<option th:each="time : ${attendanceForm.blankTimes}" th:value="${time.key}"
-											th:text="${time.value}"
-											th:selected="${time.key == dailyAttendanceForm.trainingEndTime}">
-										</option>
-									</select>
+									<div style="display: flex; gap: 5px;">
+										<select th:name="|attendanceList[${stat.index}].trainingEndTimeHour|"
+											class="form-control" style="width: 48%;">
+											<option th:each="hour : ${attendanceForm.workHour}" th:value="${hour.key}"
+												th:text="${hour.value}"
+												th:selected="${hour.key == dailyAttendanceForm.trainingEndTimeHour}">
+											</option>
+										</select>:
+										<select th:name="|attendanceList[${stat.index}].trainingEndTimeMinute|"
+											class="form-control">
+											<option th:each="minute : ${attendanceForm.workMinute}"
+												th:value="${minute.key}" th:text="${minute.value}"
+												th:selected="${minute.key == dailyAttendanceForm.trainingEndTimeMinute}">
+											</option>
+										</select>
+									</div>
 								</td>
 								<td class="w80">
 									<select th:name="|attendanceList[${stat.index}].blankTime|" class="form-control">
@@ -103,7 +123,30 @@
 			</form>
 		</div>
 	</div>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			// 全ての時刻選択プルダウンにイベントリスナーを追加
+			document.querySelectorAll('select[name*="trainingStartTimeHour"], select[name*="trainingStartTimeMinute"], select[name*="trainingEndTimeHour"], select[name*="trainingEndTimeMinute"]').forEach(function (select) {
+				select.addEventListener('change', function () {
+					// 選択された値をプルダウンに表示させるため、強制的にselectedを設定
+					const selectedValue = this.value;
 
+					// 現在のselectの全optionからselectedを削除
+					Array.from(this.options).forEach(option => {
+						option.selected = false;
+					});
+
+					// 選択された値のoptionにselectedを設定
+					if (selectedValue) {
+						const targetOption = this.querySelector(`option[value="${selectedValue}"]`);
+						if (targetOption) {
+							targetOption.selected = true;
+						}
+					}
+				});
+			});
+		});
+	</script>
 </body>
 
 </html>
