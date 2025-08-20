@@ -1,8 +1,8 @@
 package jp.co.sss.lms.service;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
-import jp.co.sss.lms.dto.StudentAttendanceDto;
 import jp.co.sss.lms.entity.TStudentAttendance;
 import jp.co.sss.lms.enums.AttendanceStatusEnum;
 import jp.co.sss.lms.form.AttendanceForm;
@@ -250,9 +249,20 @@ public class StudentAttendanceService {
 			dailyAttendanceForm.setDispTrainingDate(dateUtil
 					.dateToString(attendanceManagementDto.getTrainingDate(), "yyyy年M月d日(E)"));
 			dailyAttendanceForm.setStatusDispName(attendanceManagementDto.getStatusDispName());
-			// 時分に分割 - task26追加分
-			dailyAttendanceForm.splitTrainingStartTime();
-			dailyAttendanceForm.splitTrainingEndTime();
+			// 勤怠Utilを使用した時間・分抽出task26修正分
+			dailyAttendanceForm.setTrainingStartTimeHour(
+			    attendanceUtil.extractHour(attendanceManagementDto.getTrainingStartTime())
+			);
+			dailyAttendanceForm.setTrainingStartTimeMinute(
+			    attendanceUtil.extractMinute(attendanceManagementDto.getTrainingStartTime())
+			);
+			
+			dailyAttendanceForm.setTrainingEndTimeHour(
+			    attendanceUtil.extractHour(attendanceManagementDto.getTrainingEndTime())
+			);
+			dailyAttendanceForm.setTrainingEndTimeMinute(
+			    attendanceUtil.extractMinute(attendanceManagementDto.getTrainingEndTime())
+			);
 			attendanceForm.getAttendanceList().add(dailyAttendanceForm);
 		}
 		return attendanceForm;
@@ -339,28 +349,62 @@ public class StudentAttendanceService {
 		return messageUtil.getMessage(Constants.PROP_KEY_ATTENDANCE_UPDATE_NOTICE);
 	}
 
-	//以下修正分task25
 	/**
-	 * 過去の未入力件数を取得
+	 * 勤怠未入力件数取得
+	 * 
+	 * @param lmsUserId LMSユーザーID
+	 * @param deleteFlg 削除フラグ
+	 * @param currentDate 現在日付
+	 * @return 未入力件数
+	 */
+	public int getUnfilledPastCount(Integer lmsUserId, Short deleteFlg, Date currentDate) {
+		// a. SimpleDateFormatクラスでフォーマットパターンを設定
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+		// 1. APIを呼び出して勤怠情報を取得
+		// コースIDはログイン情報から取得
+		Integer courseId = loginUserDto.getCourseId();
+		List<AttendanceManagementDto> attendanceManagementDtoList = tStudentAttendanceMapper
+				.getAttendanceManagement(courseId, lmsUserId, deleteFlg);
+
+		// 取得したデータを正しく表示
+		for (AttendanceManagementDto dto : attendanceManagementDtoList) {
+			// 中抜け時間を設定
+			if (dto.getBlankTime() != null) {
+				TrainingTime blankTime = attendanceUtil.calcBlankTime(dto.getBlankTime());
+				dto.setBlankTimeValue(String.valueOf(blankTime));
+			}
+			// 遅刻早退区分判定
+			AttendanceStatusEnum statusEnum = AttendanceStatusEnum.getEnum(dto.getStatus());
+			if (statusEnum != null) {
+				dto.setStatusDispName(statusEnum.name);
+			}
+		}
+
+		// 過去日の未入力数をカウント
+		return countUnfilledPastWithFormat(attendanceManagementDtoList, currentDate, sdf);
+	}
+
+	/**
+	 * SimpleDateFormatを使用した過去の未入力件数を取得
 	 * 
 	 * @param list 勤怠情報リスト
 	 * @param today 今日の日付
+	 * @param sdf 日付フォーマッター
 	 * @return 過去の未入力件数
 	 */
-	public int countUnfilledPast(List<AttendanceManagementDto> list, Date today) {
+	private int countUnfilledPastWithFormat(List<AttendanceManagementDto> list, Date today, SimpleDateFormat sdf) {
 		int count = 0;
 
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(today);
-		cal.set(Calendar.HOUR_OF_DAY, 0);
-		cal.set(Calendar.MINUTE, 0);
-		cal.set(Calendar.SECOND, 0);
-		cal.set(Calendar.MILLISECOND, 0);
+		// 今日の日付を文字列に変換
+		String todayStr = sdf.format(today);
 
-		Date truncatedToday = cal.getTime();
-		for (StudentAttendanceDto dto : list) {
-			// 今日より過去の日付
-			if (dto.getTrainingDate().before(truncatedToday)) {
+		for (AttendanceManagementDto dto : list) {
+			// 研修日を文字列に変換
+			String trainingDateStr = sdf.format(dto.getTrainingDate());
+
+			// 今日より過去の日付（文字列比較）
+			if (trainingDateStr.compareTo(todayStr) < 0) {
 				boolean startEmpty = dto.getTrainingStartTime() == null || dto.getTrainingStartTime().isEmpty();
 				boolean endEmpty = dto.getTrainingEndTime() == null || dto.getTrainingEndTime().isEmpty();
 				if (startEmpty || endEmpty) {
@@ -374,12 +418,19 @@ public class StudentAttendanceService {
 	/**
 	 * 過去の未入力が存在するかを判定
 	 *
-	 * @param list 勤怠情報リスト
-	 * @param today 今日の日付
+	 * @param lmsUserId LMSユーザーID
+	 * @param deleteFlg 削除フラグ
+	 * @param currentDate 現在日付
 	 * @return true = 未入力あり, false = 未入力なし
 	 */
-	public boolean hasUnfilledPast(List<AttendanceManagementDto> list, Date today) {
-		return countUnfilledPast(list, today) > 0;
+	public boolean hasUnfilledPastBySpecification(Integer lmsUserId, Short deleteFlg, Date currentDate) {
+		int unfilledCount = getUnfilledPastCount(lmsUserId, deleteFlg, currentDate);
+		// 2. 取得した未入力カウント数が0以上の場合trueを返す
+		if (unfilledCount > 0) {
+			return true;
+		}
+		// 3. それ以外はfalseを返す
+		return false;
 	}
 
 }
