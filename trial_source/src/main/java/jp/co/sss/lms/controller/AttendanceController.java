@@ -38,7 +38,7 @@ public class AttendanceController {
 	 * @param courseId
 	 * @param model
 	 * @return 勤怠管理画面
-//	 * @throws ParseException
+	//	 * @throws ParseException
 	 */
 	@RequestMapping(path = "/detail", method = RequestMethod.GET)
 	public String index(Model model) {
@@ -47,17 +47,12 @@ public class AttendanceController {
 		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
 				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
-
 		// 今日・過去の未入力件数の取得
 		Date today = new Date();
-//		int unfilledPastCount = studentAttendanceService.countUnfilledPast(attendanceManagementDtoList, today);
-//		model.addAttribute("unfilledPastCount", unfilledPastCount);
-		
-		 // Service で未入力があるかを boolean 判定
-	    boolean showUnfilledPastAlert = studentAttendanceService.hasUnfilledPast(attendanceManagementDtoList, today);
-	    model.addAttribute("showUnfilledPastAlert", showUnfilledPastAlert);
-		
-		
+
+		// Service で未入力があるかを boolean 判定
+		boolean showUnfilledPastAlert = studentAttendanceService.hasUnfilledPast(attendanceManagementDtoList, today);
+		model.addAttribute("showUnfilledPastAlert", showUnfilledPastAlert);
 
 		return "attendance/detail";
 	}

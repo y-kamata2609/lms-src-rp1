@@ -56,7 +56,6 @@ public class DailyAttendanceForm {
 	/** 研修終了時刻-分 */
 	private String trainingEndTimeMinute;
 
-	//エラーハンドリング強化の必要性？
 	/**
 	 * trainingStartTimeから時と分を分割して設定
 	 */
