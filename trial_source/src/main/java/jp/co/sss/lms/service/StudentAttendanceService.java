@@ -27,7 +27,7 @@ import jp.co.sss.lms.util.TrainingTime;
 /**
  * 勤怠情報（受講生入力）サービス
  * 
- * @author 東京ITスクール
+ * @author 東京ITスクール、鎌田優樹
  */
 @Service
 public class StudentAttendanceService {

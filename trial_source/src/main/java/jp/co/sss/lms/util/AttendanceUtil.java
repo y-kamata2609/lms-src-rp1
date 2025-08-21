@@ -13,7 +13,7 @@ import jp.co.sss.lms.mapper.MSectionMapper;
 /**
  * 勤怠管理のユーティリティクラス
  * 
- * @author 東京ITスクール
+ * @author 東京ITスクール、鎌田優樹
  */
 @Component
 public class AttendanceUtil {

@@ -20,7 +20,7 @@ import jp.co.sss.lms.util.Constants;
 /**
  * 勤怠管理コントローラ
  * 
- * @author 東京ITスクール１
+ * @author 東京ITスクール、鎌田優樹
  */
 @Controller
 @RequestMapping("/attendance")
@@ -38,7 +38,7 @@ public class AttendanceController {
 	 * @param courseId
 	 * @param model
 	 * @return 勤怠管理画面
-	//	 * @throws ParseException
+	 * @throws ParseException
 	 */
 	@RequestMapping(path = "/detail", method = RequestMethod.GET)
 	public String index(Model model) {
