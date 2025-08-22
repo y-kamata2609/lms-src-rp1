@@ -1,8 +1,10 @@
 package jp.co.sss.lms.util;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -153,16 +155,14 @@ public class AttendanceUtil {
 	 *
 	 * @return 時間のマップ
 	 */
-	public LinkedHashMap<String, String> setWorkHour() {
-		LinkedHashMap<String, String> map = new LinkedHashMap<>();
-		map.put("", "");
+	public List<String> setWorkHour() {
+		List<String> hourList = new ArrayList<>();
+		hourList.add(""); 
 
 		for (int hour = 0; hour < 24; hour++) {
-			String hourKey = String.format("%02d", hour);
-			String hourValue = String.format("%02d", hour);
-			map.put(hourKey, hourValue);
+			hourList.add(String.format("%02d", hour));
 		}
-		return map;
+		return hourList;
 	}
 
 	/**
@@ -170,16 +170,14 @@ public class AttendanceUtil {
 	 *
 	 * @return 分のマップ
 	 */
-	public LinkedHashMap<String, String> setWorkMinute() {
-		LinkedHashMap<String, String> map = new LinkedHashMap<>();
-		map.put("", "");
-
-		for (int minute = 0; minute < 60; minute++) {
-			String minuteKey = String.format("%02d", minute);
-			String minuteValue = String.format("%02d", minute);
-			map.put(minuteKey, minuteValue);
-		}
-		return map;
+	public List<String> setWorkMinute() {
+	    List<String> minuteList = new ArrayList<>();
+	    minuteList.add(""); 
+	    
+	    for (int minute = 0; minute < 60; minute ++) {
+	        minuteList.add(String.format("%02d", minute));
+	    }
+	    return minuteList;
 	}
 
 	/**

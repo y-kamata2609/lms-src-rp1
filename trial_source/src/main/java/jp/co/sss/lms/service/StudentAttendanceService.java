@@ -251,18 +251,14 @@ public class StudentAttendanceService {
 			dailyAttendanceForm.setStatusDispName(attendanceManagementDto.getStatusDispName());
 			// 勤怠Utilを使用した時間・分抽出task26修正分
 			dailyAttendanceForm.setTrainingStartTimeHour(
-			    attendanceUtil.extractHour(attendanceManagementDto.getTrainingStartTime())
-			);
+					attendanceUtil.extractHour(attendanceManagementDto.getTrainingStartTime()));
 			dailyAttendanceForm.setTrainingStartTimeMinute(
-			    attendanceUtil.extractMinute(attendanceManagementDto.getTrainingStartTime())
-			);
-			
+					attendanceUtil.extractMinute(attendanceManagementDto.getTrainingStartTime()));
+
 			dailyAttendanceForm.setTrainingEndTimeHour(
-			    attendanceUtil.extractHour(attendanceManagementDto.getTrainingEndTime())
-			);
+					attendanceUtil.extractHour(attendanceManagementDto.getTrainingEndTime()));
 			dailyAttendanceForm.setTrainingEndTimeMinute(
-			    attendanceUtil.extractMinute(attendanceManagementDto.getTrainingEndTime())
-			);
+					attendanceUtil.extractMinute(attendanceManagementDto.getTrainingEndTime()));
 			attendanceForm.getAttendanceList().add(dailyAttendanceForm);
 		}
 		return attendanceForm;
@@ -431,6 +427,106 @@ public class StudentAttendanceService {
 		}
 		// 3. それ以外はfalseを返す
 		return false;
+	}
+
+	/**
+	 * 勤怠フォームのバリデーションtask27
+	 * 
+	 * @param attendanceForm 勤怠フォーム
+	 * @return エラーメッセージ（エラーなしの場合はnull）
+	 */
+	public String validateAttendanceForm(AttendanceForm attendanceForm) {
+
+		List<String> errorMessages = new ArrayList<>();
+
+		// 勤怠リストの件数分チェックを実行
+		for (int n = 0; n < attendanceForm.getAttendanceList().size(); n++) {
+			DailyAttendanceForm dailyForm = attendanceForm.getAttendanceList().get(n);
+
+			// a. 備考の文字数チェック（100文字以内）
+			if (dailyForm.getNote() != null && dailyForm.getNote().length() > 100) {
+				errorMessages.add(messageUtil.getMessage("maxlength", new String[] { "備考", "100" }));
+			}
+
+			// b. 出勤時間の時・分の入力チェック
+			boolean punchInHourEmpty = isEmptyString(dailyForm.getTrainingStartTimeHour());
+			boolean punchInMinuteEmpty = isEmptyString(dailyForm.getTrainingStartTimeMinute());
+
+			if ((punchInHourEmpty && !punchInMinuteEmpty) || (!punchInHourEmpty && punchInMinuteEmpty)) {
+				errorMessages.add(messageUtil.getMessage("input.invalid", new String[] { "出勤時間" }));
+			}
+
+			// c. 退勤時間の時・分の入力チェック
+			boolean punchOutHourEmpty = isEmptyString(dailyForm.getTrainingEndTimeHour());
+			boolean punchOutMinuteEmpty = isEmptyString(dailyForm.getTrainingEndTimeMinute());
+
+			if ((punchOutHourEmpty && !punchOutMinuteEmpty) || (!punchOutHourEmpty && punchOutMinuteEmpty)) {
+				errorMessages.add(messageUtil.getMessage("input.invalid", new String[] { "退勤時間" }));
+			}
+
+			// d. 出勤時間なし & 退勤時間ありのチェック
+			boolean punchInEmpty = punchInHourEmpty && punchInMinuteEmpty;
+			boolean punchOutExists = !punchOutHourEmpty && !punchOutMinuteEmpty;
+
+			if (punchInEmpty && punchOutExists) {
+				errorMessages.add(messageUtil.getMessage("attendance.punchInEmpty"));
+			}
+
+			// e. 出勤時間 > 退勤時間のチェック + f. 中抜け時間チェック
+			if (!isEmptyString(dailyForm.getTrainingStartTime()) && !isEmptyString(dailyForm.getTrainingEndTime())) {
+				try {
+					TrainingTime startTime = new TrainingTime(dailyForm.getTrainingStartTime());
+					TrainingTime endTime = new TrainingTime(dailyForm.getTrainingEndTime());
+					
+					// 勤務時間を計算（分単位）
+					int startMinutes = startTime.getHour() * 60 + startTime.getMinute();
+					int endMinutes = endTime.getHour() * 60 + endTime.getMinute();
+					int workTimeMinutes = endMinutes - startMinutes; // 勤務時間（分）
+					
+					// e. 出勤時間 > 退勤時間のチェック（workTimeMinutes <= 0の場合）
+					if (workTimeMinutes <= 0) {
+						errorMessages.add(messageUtil.getMessage("attendance.trainingTimeRange", new String[]{String.valueOf(n + 1)}));
+					}
+					
+					// f. 中抜け時間が勤務時間を超えるチェック
+					if (dailyForm.getBlankTime() != null && workTimeMinutes > 0) {
+						try {
+							TrainingTime blankTime = attendanceUtil.calcBlankTime(dailyForm.getBlankTime());
+							int blankTimeMinutes = blankTime.getHour() * 60 + blankTime.getMinute();
+							
+							// workTimeMinutes < blankTimeMinutes の場合エラー
+							if (workTimeMinutes < blankTimeMinutes) {
+								errorMessages.add(messageUtil.getMessage("attendance.blankTimeError"));
+							}
+						} catch (Exception e) {
+							// 中抜け時間の計算でエラーが発生した場合
+							errorMessages.add(messageUtil.getMessage("attendance.blankTimeError"));
+						}
+					}
+					
+				} catch (Exception e) {
+					// 時間フォーマットエラーの場合
+					errorMessages.add(messageUtil.getMessage("trainingTime", new String[]{"出勤時間または退勤時間"}));
+				}
+			}
+		}
+
+		// エラーメッセージがある場合は結合して返す
+		if (!errorMessages.isEmpty()) {
+			return String.join("\n", errorMessages);
+		}
+
+		return null; // エラーなし
+	}
+
+	/**
+	 * 文字列が空かどうかをチェック
+	 * 
+	 * @param str チェック対象文字列
+	 * @return true: 空、false: 空でない
+	 */
+	private boolean isEmptyString(String str) {
+		return str == null || str.trim().isEmpty();
 	}
 
 }

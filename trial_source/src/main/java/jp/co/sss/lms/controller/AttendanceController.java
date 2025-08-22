@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
 import jp.co.sss.lms.form.AttendanceForm;
+import jp.co.sss.lms.form.DailyAttendanceForm;
 import jp.co.sss.lms.service.StudentAttendanceService;
 import jp.co.sss.lms.util.Constants;
 
@@ -49,7 +50,7 @@ public class AttendanceController {
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
 		// 今日・過去の未入力件数の取得
 		Date today = new Date();
-		
+
 		// Service で未入力があるかを boolean 判定
 		boolean showUnfilledPastAlert = studentAttendanceService.hasUnfilledPastBySpecification(
 				loginUserDto.getLmsUserId(),
@@ -142,8 +143,32 @@ public class AttendanceController {
 	@RequestMapping(path = "/update", params = "complete", method = RequestMethod.POST)
 	public String complete(AttendanceForm attendanceForm, Model model, BindingResult result)
 			throws ParseException {
+
+		// ①. 出勤/退勤時間をhh:mm形式に設定
+		for (DailyAttendanceForm dailyForm : attendanceForm.getAttendanceList()) {
+			dailyForm.combineTrainingStartTime();
+			dailyForm.combineTrainingEndTime();
+		}
 		
+		//以下task27の内容
+		// 入力チェック実行
+		String validationError = studentAttendanceService.validateAttendanceForm(attendanceForm);
 		
+		if (validationError != null) {
+			// バリデーションエラーがある場合
+			model.addAttribute("error", validationError);
+			
+			// 勤怠管理リストの再取得
+			List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
+					.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
+			
+			// 勤怠フォームの再生成（選択肢も含めて全て再設定）
+			attendanceForm = studentAttendanceService.setAttendanceForm(attendanceManagementDtoList);
+			
+			model.addAttribute("attendanceForm", attendanceForm);
+			return "attendance/update"; // エラー時は元の画面に戻る
+		}
+
 		// 更新
 		String message = studentAttendanceService.update(attendanceForm);
 		model.addAttribute("message", message);
