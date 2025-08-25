@@ -16,6 +16,7 @@ import jp.co.sss.lms.dto.LoginUserDto;
 import jp.co.sss.lms.form.AttendanceForm;
 import jp.co.sss.lms.form.DailyAttendanceForm;
 import jp.co.sss.lms.service.StudentAttendanceService;
+import jp.co.sss.lms.util.AttendanceUtil;
 import jp.co.sss.lms.util.Constants;
 
 /**
@@ -31,6 +32,8 @@ public class AttendanceController {
 	private StudentAttendanceService studentAttendanceService;
 	@Autowired
 	private LoginUserDto loginUserDto;
+	@Autowired
+	private AttendanceUtil attendanceUtil;
 
 	/**
 	 * 勤怠管理画面 初期表示
@@ -158,12 +161,10 @@ public class AttendanceController {
 			// バリデーションエラーがある場合
 			model.addAttribute("error", validationError);
 			
-			// 勤怠管理リストの再取得
-			List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
-					.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
-			
-			// 勤怠フォームの再生成（選択肢も含めて全て再設定）
-			attendanceForm = studentAttendanceService.setAttendanceForm(attendanceManagementDtoList);
+			//入力値を維持する
+	        attendanceForm.setWorkHour(attendanceUtil.setWorkHour());
+	        attendanceForm.setWorkMinute(attendanceUtil.setWorkMinute());
+	        attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
 			
 			model.addAttribute("attendanceForm", attendanceForm);
 			return "attendance/update"; // エラー時は元の画面に戻る

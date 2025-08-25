@@ -528,5 +528,6 @@ public class StudentAttendanceService {
 	private boolean isEmptyString(String str) {
 		return str == null || str.trim().isEmpty();
 	}
+	
 
 }
