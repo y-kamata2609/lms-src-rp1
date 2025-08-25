@@ -152,20 +152,19 @@ public class AttendanceController {
 			dailyForm.combineTrainingStartTime();
 			dailyForm.combineTrainingEndTime();
 		}
-		
-		//以下task27の内容
-		// 入力チェック実行
+
+		// 入力チェック実行（既存メソッドを使用、内部でエラーフラグも設定）
 		String validationError = studentAttendanceService.validateAttendanceForm(attendanceForm);
-		
+
 		if (validationError != null) {
 			// バリデーションエラーがある場合
 			model.addAttribute("error", validationError);
-			
+
 			//入力値を維持する
-	        attendanceForm.setWorkHour(attendanceUtil.setWorkHour());
-	        attendanceForm.setWorkMinute(attendanceUtil.setWorkMinute());
-	        attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
-			
+			attendanceForm.setWorkHour(attendanceUtil.setWorkHour());
+			attendanceForm.setWorkMinute(attendanceUtil.setWorkMinute());
+			attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
+
 			model.addAttribute("attendanceForm", attendanceForm);
 			return "attendance/update"; // エラー時は元の画面に戻る
 		}

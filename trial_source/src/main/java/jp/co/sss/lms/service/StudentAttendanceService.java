@@ -357,6 +357,8 @@ public class StudentAttendanceService {
 		// a. SimpleDateFormatクラスでフォーマットパターンを設定
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
+		//ここでdateを呼び出す
+
 		// 1. APIを呼び出して勤怠情報を取得
 		// コースIDはログイン情報から取得
 		Integer courseId = loginUserDto.getCourseId();
@@ -430,7 +432,7 @@ public class StudentAttendanceService {
 	}
 
 	/**
-	 * 勤怠フォームのバリデーションtask27
+	 * 勤怠フォームのバリデーションtask27（エラーフラグ設定付き）
 	 * 
 	 * @param attendanceForm 勤怠フォーム
 	 * @return エラーメッセージ（エラーなしの場合はnull）
@@ -443,6 +445,10 @@ public class StudentAttendanceService {
 		for (int n = 0; n < attendanceForm.getAttendanceList().size(); n++) {
 			DailyAttendanceForm dailyForm = attendanceForm.getAttendanceList().get(n);
 
+			// エラーフラグを初期化（追加）
+			dailyForm.setHasStartTimeError(false);
+			dailyForm.setHasEndTimeError(false);
+
 			// a. 備考の文字数チェック（100文字以内）
 			if (dailyForm.getNote() != null && dailyForm.getNote().length() > 100) {
 				errorMessages.add(messageUtil.getMessage("maxlength", new String[] { "備考", "100" }));
@@ -454,6 +460,7 @@ public class StudentAttendanceService {
 
 			if ((punchInHourEmpty && !punchInMinuteEmpty) || (!punchInHourEmpty && punchInMinuteEmpty)) {
 				errorMessages.add(messageUtil.getMessage("input.invalid", new String[] { "出勤時間" }));
+				dailyForm.setHasStartTimeError(true); // 追加：エラーフラグ設定
 			}
 
 			// c. 退勤時間の時・分の入力チェック
@@ -462,6 +469,7 @@ public class StudentAttendanceService {
 
 			if ((punchOutHourEmpty && !punchOutMinuteEmpty) || (!punchOutHourEmpty && punchOutMinuteEmpty)) {
 				errorMessages.add(messageUtil.getMessage("input.invalid", new String[] { "退勤時間" }));
+				dailyForm.setHasEndTimeError(true); // 追加：エラーフラグ設定
 			}
 
 			// d. 出勤時間なし & 退勤時間ありのチェック
@@ -470,6 +478,7 @@ public class StudentAttendanceService {
 
 			if (punchInEmpty && punchOutExists) {
 				errorMessages.add(messageUtil.getMessage("attendance.punchInEmpty"));
+				dailyForm.setHasStartTimeError(true); // 追加：エラーフラグ設定
 			}
 
 			// e. 出勤時間 > 退勤時間のチェック + f. 中抜け時間チェック
@@ -477,23 +486,26 @@ public class StudentAttendanceService {
 				try {
 					TrainingTime startTime = new TrainingTime(dailyForm.getTrainingStartTime());
 					TrainingTime endTime = new TrainingTime(dailyForm.getTrainingEndTime());
-					
+
 					// 勤務時間を計算（分単位）
 					int startMinutes = startTime.getHour() * 60 + startTime.getMinute();
 					int endMinutes = endTime.getHour() * 60 + endTime.getMinute();
 					int workTimeMinutes = endMinutes - startMinutes; // 勤務時間（分）
-					
+
 					// e. 出勤時間 > 退勤時間のチェック（workTimeMinutes <= 0の場合）
 					if (workTimeMinutes <= 0) {
-						errorMessages.add(messageUtil.getMessage("attendance.trainingTimeRange", new String[]{String.valueOf(n + 1)}));
+						errorMessages.add(messageUtil.getMessage("attendance.trainingTimeRange",
+								new String[] { String.valueOf(n + 1) }));
+						dailyForm.setHasStartTimeError(true); // 追加：エラーフラグ設定
+						dailyForm.setHasEndTimeError(true); // 追加：エラーフラグ設定
 					}
-					
+
 					// f. 中抜け時間が勤務時間を超えるチェック
 					if (dailyForm.getBlankTime() != null && workTimeMinutes > 0) {
 						try {
 							TrainingTime blankTime = attendanceUtil.calcBlankTime(dailyForm.getBlankTime());
 							int blankTimeMinutes = blankTime.getHour() * 60 + blankTime.getMinute();
-							
+
 							// workTimeMinutes < blankTimeMinutes の場合エラー
 							if (workTimeMinutes < blankTimeMinutes) {
 								errorMessages.add(messageUtil.getMessage("attendance.blankTimeError"));
@@ -503,10 +515,12 @@ public class StudentAttendanceService {
 							errorMessages.add(messageUtil.getMessage("attendance.blankTimeError"));
 						}
 					}
-					
+
 				} catch (Exception e) {
 					// 時間フォーマットエラーの場合
-					errorMessages.add(messageUtil.getMessage("trainingTime", new String[]{"出勤時間または退勤時間"}));
+					errorMessages.add(messageUtil.getMessage("trainingTime", new String[] { "出勤時間または退勤時間" }));
+					dailyForm.setHasStartTimeError(true); // 追加：エラーフラグ設定
+					dailyForm.setHasEndTimeError(true); // 追加：エラーフラグ設定
 				}
 			}
 		}
@@ -528,6 +542,5 @@ public class StudentAttendanceService {
 	private boolean isEmptyString(String str) {
 		return str == null || str.trim().isEmpty();
 	}
-	
 
 }

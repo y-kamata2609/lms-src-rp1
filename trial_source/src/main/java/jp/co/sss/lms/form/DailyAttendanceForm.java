@@ -4,7 +4,7 @@ import lombok.Data;
 
 /**
  * 日次の勤怠フォーム
- * 
+ *
  * @author 東京ITスクール、鎌田優樹
  */
 @Data
@@ -46,6 +46,7 @@ public class DailyAttendanceForm {
 	private String courseName;
 	/** インデックス */
 	private String index;
+
 	//task26追加分
 	/** 研修開始時刻-時 */
 	private String trainingStartTimeHour;
@@ -55,6 +56,11 @@ public class DailyAttendanceForm {
 	private String trainingEndTimeHour;
 	/** 研修終了時刻-分 */
 	private String trainingEndTimeMinute;
+
+	/** 出勤時間エラーフラグ */
+	private Boolean hasStartTimeError = false;
+	/** 退勤時間エラーフラグ */
+	private Boolean hasEndTimeError = false;
 
 	/**
 	 * trainingStartTimeから時と分を分割して設定
@@ -113,5 +119,4 @@ public class DailyAttendanceForm {
 			this.trainingEndTime = trainingEndTimeHour + ":" + trainingEndTimeMinute;
 		}
 	}
-
 }

@@ -32,8 +32,20 @@ public class AttendanceForm {
 	/** 日次の勤怠フォームリスト */
 	private List<DailyAttendanceForm> attendanceList;
 	//task26変更分
-    /** 勤務時間-時(プルダウン) */
-    private List<String> workHour;
-    /** 勤務時間-分(プルダウン) */
-    private List<String> workMinute;
+	/** 勤務時間-時(プルダウン) */
+	private List<String> workHour;
+	/** 勤務時間-分(プルダウン) */
+	private List<String> workMinute;
+
+	/** エラーメッセージ */
+	private String errorMessage;
+
+	// ゲッター・セッターも追加
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
 }

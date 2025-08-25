@@ -71,6 +71,7 @@
 										<div style="display: flex; gap: 5px;">
 											<select th:name="|attendanceList[${stat.index}].trainingStartTimeHour|"
 												th:id="'startHour_' + ${stat.index}" class="form-control"
+												th:style="${dailyAttendanceForm.hasStartTimeError == true} ? 'background-color: #f2dede !important; border: 2px solid #a94442 !important;' : ''"
 												style="width: 48%; display: inline-block;">
 												<option th:each="hour : ${attendanceForm.workHour}" th:value="${hour}"
 													th:text="${hour}"
@@ -78,7 +79,8 @@
 												</option>
 											</select>:
 											<select th:name="|attendanceList[${stat.index}].trainingStartTimeMinute|"
-												th:id="'startMinute_' + ${stat.index}" class="form-control"
+												th:id="'startMinute_' + ${stat.index}"
+												th:class="${dailyAttendanceForm.hasStartTimeError == true} ? 'form-control bg-danger' : 'form-control'"
 												style="width: 48%;">
 												<option th:each="minute : ${attendanceForm.workMinute}"
 													th:value="${minute}" th:text="${minute}"
@@ -90,7 +92,8 @@
 									<td class="w160">
 										<div style="display: flex; gap: 5px;">
 											<select th:name="|attendanceList[${stat.index}].trainingEndTimeHour|"
-												th:id="'endHour_' + ${stat.index}" class="form-control"
+												th:id="'endHour_' + ${stat.index}"
+												th:class="${dailyAttendanceForm.hasEndTimeError == true} ? 'form-control bg-danger' : 'form-control'"
 												style="width: 48%;">
 												<option th:each="hour : ${attendanceForm.workHour}" th:value="${hour}"
 													th:text="${hour}"
@@ -98,7 +101,8 @@
 												</option>
 											</select>:
 											<select th:name="|attendanceList[${stat.index}].trainingEndTimeMinute|"
-												th:id="'endMinute_' + ${stat.index}" class="form-control"
+												th:id="'endMinute_' + ${stat.index}"
+												th:class="${dailyAttendanceForm.hasEndTimeError == true} ? 'form-control bg-danger' : 'form-control'"
 												style="width: 48%;">
 												<option th:each="minute : ${attendanceForm.workMinute}"
 													th:value="${minute}" th:text="${minute}"
