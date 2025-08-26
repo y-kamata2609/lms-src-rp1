@@ -1,5 +1,4 @@
 package jp.co.sss.lms.form;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -12,7 +11,6 @@ import lombok.Data;
  */
 @Data
 public class AttendanceForm {
-
 	/** LMSユーザーID */
 	private Integer lmsUserId;
 	/** グループID */
@@ -31,9 +29,8 @@ public class AttendanceForm {
 	private LinkedHashMap<Integer, String> blankTimes;
 	/** 日次の勤怠フォームリスト */
 	private List<DailyAttendanceForm> attendanceList;
-	//task26変更分
-    /** 勤務時間-時(プルダウン) */
-    private List<String> workHour;
-    /** 勤務時間-分(プルダウン) */
-    private List<String> workMinute;
+	/** 勤務時間-時(プルダウン) */
+	private LinkedHashMap<Integer, String> workHour;
+	/** 勤務時間-分(プルダウン) */
+	private LinkedHashMap<Integer, String> workMinute;
 }

@@ -1,10 +1,8 @@
 package jp.co.sss.lms.util;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -149,20 +147,19 @@ public class AttendanceUtil {
 		return false;
 	}
 
-	//task26分
 	/**
 	 * 時間（0-23時）のプルダウン用データ取得
 	 *
 	 * @return 時間のマップ
 	 */
-	public List<String> setWorkHour() {
-		List<String> hourList = new ArrayList<>();
-		hourList.add(""); 
+	public LinkedHashMap<Integer, String> getHourMap() {
+		LinkedHashMap<Integer, String> hourMap = new LinkedHashMap<>();
+		hourMap.put(null, "");
 
 		for (int hour = 0; hour < 24; hour++) {
-			hourList.add(String.format("%02d", hour));
+			hourMap.put(hour, String.format("%02d", hour));
 		}
-		return hourList;
+		return hourMap;
 	}
 
 	/**
@@ -170,45 +167,53 @@ public class AttendanceUtil {
 	 *
 	 * @return 分のマップ
 	 */
-	public List<String> setWorkMinute() {
-	    List<String> minuteList = new ArrayList<>();
-	    minuteList.add(""); 
-	    
-	    for (int minute = 0; minute < 60; minute ++) {
-	        minuteList.add(String.format("%02d", minute));
-	    }
-	    return minuteList;
+	public LinkedHashMap<Integer, String> getMinuteMap() {
+		LinkedHashMap<Integer, String> minuteMap = new LinkedHashMap<>();
+		minuteMap.put(null, "");
+
+		for (int minute = 0; minute < 60; minute++) {
+			minuteMap.put(minute, String.format("%02d", minute));
+		}
+		return minuteMap;
 	}
 
 	/**
-	 * 時刻文字列から時間部分を抽出
+	 * 時間(時)の切り出し
 	 * 
-	 * @param timeString 時刻文字列（例："09:30"）
-	 * @return 時間部分（例："09"）、不正な場合は空文字
+	 * @param timeString 開始時刻or終了時刻
+	 * @return 出退勤時間(時間)
 	 */
-	public String extractHour(String timeString) {
+	public Integer getHour(String timeString) {
 		if (timeString != null && !timeString.trim().isEmpty()) {
 			String[] parts = timeString.split(":");
 			if (parts.length >= 2) {
-				return parts[0].trim();
+				try {
+					return Integer.parseInt(parts[0].trim());
+				} catch (NumberFormatException e) {
+					return null;
+				}
 			}
 		}
-		return "";
+		return null;
 	}
 
 	/**
-	 * 時刻文字列から分部分を抽出
+	 * 時間(分)の切り出し
 	 * 
-	 * @param timeString 時刻文字列（例："09:30"）
-	 * @return 分部分（例："30"）、不正な場合は空文字
+	 * @param timeString 開始時刻or終了時刻
+	 * @return 出退勤時間(分)
 	 */
-	public String extractMinute(String timeString) {
+	public Integer getMinute(String timeString) {
 		if (timeString != null && !timeString.trim().isEmpty()) {
 			String[] parts = timeString.split(":");
 			if (parts.length >= 2) {
-				return parts[1].trim();
+				try {
+					return Integer.parseInt(parts[1].trim());
+				} catch (NumberFormatException e) {
+					return null;
+				}
 			}
 		}
-		return "";
+		return null;
 	}
 }

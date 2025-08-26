@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
 import jp.co.sss.lms.form.AttendanceForm;
-import jp.co.sss.lms.form.DailyAttendanceForm;
 import jp.co.sss.lms.service.StudentAttendanceService;
 import jp.co.sss.lms.util.AttendanceUtil;
 import jp.co.sss.lms.util.Constants;
@@ -147,32 +146,26 @@ public class AttendanceController {
 	public String complete(AttendanceForm attendanceForm, Model model, BindingResult result)
 			throws ParseException {
 
-		// ①. 出勤/退勤時間をhh:mm形式に設定
-		for (DailyAttendanceForm dailyForm : attendanceForm.getAttendanceList()) {
-			dailyForm.combineTrainingStartTime();
-			dailyForm.combineTrainingEndTime();
-		}
-		
-		//以下task27の内容
-		// 入力チェック実行
+		// task27: 入力チェック実行
 		String validationError = studentAttendanceService.validateAttendanceForm(attendanceForm);
 		
 		if (validationError != null) {
 			// バリデーションエラーがある場合
 			model.addAttribute("error", validationError);
 			
-			//入力値を維持する
-	        attendanceForm.setWorkHour(attendanceUtil.setWorkHour());
-	        attendanceForm.setWorkMinute(attendanceUtil.setWorkMinute());
-	        attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
+			// 入力値を維持するため、プルダウン用データを再設定
+			attendanceForm.setWorkHour(attendanceUtil.getHourMap());
+			attendanceForm.setWorkMinute(attendanceUtil.getMinuteMap());
+			attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
 			
 			model.addAttribute("attendanceForm", attendanceForm);
 			return "attendance/update"; // エラー時は元の画面に戻る
 		}
 
-		// 更新
+		// 更新処理
 		String message = studentAttendanceService.update(attendanceForm);
 		model.addAttribute("message", message);
+		
 		// 一覧の再取得
 		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
 				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
