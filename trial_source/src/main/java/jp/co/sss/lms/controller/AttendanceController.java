@@ -148,16 +148,17 @@ public class AttendanceController {
 
 		// task27: 入力チェック実行
 		String validationError = studentAttendanceService.validateAttendanceForm(attendanceForm);
-		
+
 		if (validationError != null) {
 			// バリデーションエラーがある場合
 			model.addAttribute("error", validationError);
-			
+			model.addAttribute("errorFields", attendanceForm.getErrorFields());
+
 			// 入力値を維持するため、プルダウン用データを再設定
 			attendanceForm.setWorkHour(attendanceUtil.getHourMap());
 			attendanceForm.setWorkMinute(attendanceUtil.getMinuteMap());
 			attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
-			
+
 			model.addAttribute("attendanceForm", attendanceForm);
 			return "attendance/update"; // エラー時は元の画面に戻る
 		}
@@ -165,7 +166,7 @@ public class AttendanceController {
 		// 更新処理
 		String message = studentAttendanceService.update(attendanceForm);
 		model.addAttribute("message", message);
-		
+
 		// 一覧の再取得
 		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
 				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());

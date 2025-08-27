@@ -4,6 +4,13 @@
 <head>
 	<meta charset="UTF-8">
 	<title>勤怠情報変更｜LMS</title>
+	<style>
+		/* エラーフィールドのハイライト */
+		.error-highlight {
+			background-color: #ffeaea !important;
+			border: 1px solid #ff6b6b !important;
+		}
+	</style>
 </head>
 
 <body>
@@ -22,6 +29,21 @@
 	<div th:if="${error}" class="text-danger" style="margin-bottom: 20px;">
 		<strong>*</strong>
 		<span th:text="${error}" style="white-space: pre-line;"></span>
+	</div>
+
+	<!-- バリデーション実行確認用 -->
+	<div th:if="${error}" class="alert alert-warning" style="margin-bottom: 20px;">
+		<p>エラーメッセージあり: <span th:text="${error}"></span></p>
+		<p>errorFieldsの状態: <span th:text="${errorFields}"></span></p>
+		<p>errorFieldsのサイズ: <span th:text="${errorFields != null ? errorFields.size() : 'null'}"></span></p>
+	</div>
+
+	<!-- デバッグ用：エラーフィールドの内容を表示 -->
+	<div th:if="${errorFields}" class="alert alert-info" style="margin-bottom: 20px;">
+		<strong>デバッグ情報（エラーフィールド）:</strong>
+		<ul>
+			<li th:each="field : ${errorFields}" th:text="${field}"></li>
+		</ul>
 	</div>
 
 	<div class="row">
@@ -68,15 +90,17 @@
 									<td class="w160">
 										<div style="display: flex; gap: 5px;">
 											<select th:name="|attendanceList[${stat.index}].trainingStartTimeHour|"
-												th:id="'startHour_' + ${stat.index}" class="form-control"
+												th:id="'startHour_' + ${stat.index}"
+												th:class="${errorFields != null and errorFields.contains('attendanceList[' + stat.index + '].trainingStartTimeHour') ? 'form-control error-highlight' : 'form-control'}"
 												style="width: 48%; display: inline-block;">
-												<option th:each="hour : ${attendanceForm.workHour}" th:value="${hour.key}"
-													th:text="${hour.value}"
+												<option th:each="hour : ${attendanceForm.workHour}"
+													th:value="${hour.key}" th:text="${hour.value}"
 													th:selected="${hour.key == dailyAttendanceForm.trainingStartTimeHour}">
 												</option>
 											</select>:
 											<select th:name="|attendanceList[${stat.index}].trainingStartTimeMinute|"
-												th:id="'startMinute_' + ${stat.index}" class="form-control"
+												th:id="'startMinute_' + ${stat.index}"
+												th:class="${errorFields != null and errorFields.contains('attendanceList[' + stat.index + '].trainingStartTimeMinute') ? 'form-control error-highlight' : 'form-control'}"
 												style="width: 48%;">
 												<option th:each="minute : ${attendanceForm.workMinute}"
 													th:value="${minute.key}" th:text="${minute.value}"
@@ -88,15 +112,17 @@
 									<td class="w160">
 										<div style="display: flex; gap: 5px;">
 											<select th:name="|attendanceList[${stat.index}].trainingEndTimeHour|"
-												th:id="'endHour_' + ${stat.index}" class="form-control"
+												th:id="'endHour_' + ${stat.index}"
+												th:class="${errorFields != null and errorFields.contains('attendanceList[' + stat.index + '].trainingEndTimeHour') ? 'form-control error-highlight' : 'form-control'}"
 												style="width: 48%;">
-												<option th:each="hour : ${attendanceForm.workHour}" th:value="${hour.key}"
-													th:text="${hour.value}"
+												<option th:each="hour : ${attendanceForm.workHour}"
+													th:value="${hour.key}" th:text="${hour.value}"
 													th:selected="${hour.key == dailyAttendanceForm.trainingEndTimeHour}">
 												</option>
 											</select>:
 											<select th:name="|attendanceList[${stat.index}].trainingEndTimeMinute|"
-												th:id="'endMinute_' + ${stat.index}" class="form-control"
+												th:id="'endMinute_' + ${stat.index}"
+												th:class="${errorFields != null and errorFields.contains('attendanceList[' + stat.index + '].trainingEndTimeMinute') ? 'form-control error-highlight' : 'form-control'}"
 												style="width: 48%;">
 												<option th:each="minute : ${attendanceForm.workMinute}"
 													th:value="${minute.key}" th:text="${minute.value}"
@@ -107,7 +133,7 @@
 									</td>
 									<td class="w100">
 										<select th:name="|attendanceList[${stat.index}].blankTime|"
-											class="form-control">
+											th:class="${errorFields != null and errorFields.contains('attendanceList[' + stat.index + '].blankTime') ? 'form-control error-highlight' : 'form-control'}">
 											<option th:each="blankTime : ${attendanceForm.blankTimes}"
 												th:value="${blankTime.key}" th:inline="text" class="form-control"
 												th:selected="${blankTime.key == dailyAttendanceForm.blankTime}">
@@ -117,7 +143,8 @@
 									<td class="w70">[[${dailyAttendanceForm.statusDispName}]]</td>
 									<td class="w240">
 										<input type="text" th:name="|attendanceList[${stat.index}].note|"
-											th:value="${dailyAttendanceForm.note}" class="form-control"></input>
+											th:value="${dailyAttendanceForm.note}"
+											th:class="${errorFields != null and errorFields.contains('attendanceList[' + stat.index + '].note') ? 'form-control error-highlight' : 'form-control'}"></input>
 									</td>
 								</tr>
 							</th:block>

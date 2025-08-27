@@ -1,4 +1,5 @@
 package jp.co.sss.lms.form;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -33,4 +34,6 @@ public class AttendanceForm {
 	private LinkedHashMap<Integer, String> workHour;
 	/** 勤務時間-分(プルダウン) */
 	private LinkedHashMap<Integer, String> workMinute;
+	/** エラーフィールド一覧（task27用） */
+	private List<String> errorFields;
 }
