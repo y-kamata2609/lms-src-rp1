@@ -1,7 +1,6 @@
 package jp.co.sss.lms.service;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -344,74 +343,11 @@ public class StudentAttendanceService {
 		return messageUtil.getMessage(Constants.PROP_KEY_ATTENDANCE_UPDATE_NOTICE);
 	}
 
-	/**
-	 * 勤怠未入力件数取得
-	 * 
-	 * @param lmsUserId LMSユーザーID
-	 * @param deleteFlg 削除フラグ
-	 * @param currentDate 現在日付
-	 * @return 未入力件数
-	 */
-	public int getUnfilledPastCount(Integer lmsUserId, Short deleteFlg, Date currentDate) {
-		// a. SimpleDateFormatクラスでフォーマットパターンを設定
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-		// 1. APIを呼び出して勤怠情報を取得
-		// コースIDはログイン情報から取得
-		Integer courseId = loginUserDto.getCourseId();
-		List<AttendanceManagementDto> attendanceManagementDtoList = tStudentAttendanceMapper
-				.getAttendanceManagement(courseId, lmsUserId, deleteFlg);
-
-		// 取得したデータを正しく表示
-		for (AttendanceManagementDto dto : attendanceManagementDtoList) {
-			// 中抜け時間を設定
-			if (dto.getBlankTime() != null) {
-				TrainingTime blankTime = attendanceUtil.calcBlankTime(dto.getBlankTime());
-				dto.setBlankTimeValue(String.valueOf(blankTime));
-			}
-			// 遅刻早退区分判定
-			AttendanceStatusEnum statusEnum = AttendanceStatusEnum.getEnum(dto.getStatus());
-			if (statusEnum != null) {
-				dto.setStatusDispName(statusEnum.name);
-			}
-		}
-
-		// 過去日の未入力数をカウント
-		return countUnfilledPastWithFormat(attendanceManagementDtoList, currentDate, sdf);
-	}
-
-	/**
-	 * SimpleDateFormatを使用した過去の未入力件数を取得
-	 * 
-	 * @param list 勤怠情報リスト
-	 * @param today 今日の日付
-	 * @param sdf 日付フォーマッター
-	 * @return 過去の未入力件数
-	 */
-	private int countUnfilledPastWithFormat(List<AttendanceManagementDto> list, Date today, SimpleDateFormat sdf) {
-		int count = 0;
-
-		// 今日の日付を文字列に変換
-		String todayStr = sdf.format(today);
-
-		for (AttendanceManagementDto dto : list) {
-			// 研修日を文字列に変換
-			String trainingDateStr = sdf.format(dto.getTrainingDate());
-
-			// 今日より過去の日付（文字列比較）
-			if (trainingDateStr.compareTo(todayStr) < 0) {
-				boolean startEmpty = dto.getTrainingStartTime() == null || dto.getTrainingStartTime().isEmpty();
-				boolean endEmpty = dto.getTrainingEndTime() == null || dto.getTrainingEndTime().isEmpty();
-				if (startEmpty || endEmpty) {
-					count++;
-				}
-			}
-		}
-		return count;
-	}
+	
 
 	/**
 	 * 過去の未入力が存在するかを判定
+	 * API設計書準拠：データベースでCOUNT(*)実行
 	 *
 	 * @param lmsUserId LMSユーザーID
 	 * @param deleteFlg 削除フラグ
@@ -419,13 +355,8 @@ public class StudentAttendanceService {
 	 * @return true = 未入力あり, false = 未入力なし
 	 */
 	public boolean hasUnfilledPastBySpecification(Integer lmsUserId, Short deleteFlg, Date currentDate) {
-		int unfilledCount = getUnfilledPastCount(lmsUserId, deleteFlg, currentDate);
-		// 2. 取得した未入力カウント数が0以上の場合trueを返す
-		if (unfilledCount > 0) {
-			return true;
-		}
-		// 3. それ以外はfalseを返す
-		return false;
+		Integer count = tStudentAttendanceMapper.getUnfilledPastCount(lmsUserId, deleteFlg, currentDate);
+		return count != null && count > 0;
 	}
 
 	/**

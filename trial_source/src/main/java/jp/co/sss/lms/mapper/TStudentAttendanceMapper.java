@@ -65,4 +65,15 @@ public interface TStudentAttendanceMapper {
 	 */
 	Boolean update(TStudentAttendance tStudentAttendance);
 
+	/**
+	 * 勤怠情報（受講生入力）未入力件数取得
+	 * API設計書準拠：過去日の未入力勤怠件数をCOUNT(*)で取得
+	 * 
+	 * @param lmsUserId LMSユーザーID
+	 * @param deleteFlg 削除フラグ
+	 * @param trainingDate 基準日付
+	 * @return 未入力件数
+	 */
+	Integer getUnfilledPastCount(Integer lmsUserId, Short deleteFlg, Date trainingDate);
+
 }

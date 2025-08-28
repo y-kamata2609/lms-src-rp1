@@ -4,7 +4,6 @@
 <head>
 	<meta charset="UTF-8">
 	<title>勤怠情報変更｜LMS</title>
-
 </head>
 
 <body>
@@ -32,14 +31,16 @@
 				<div class="table-scroll-container" style="max-height: 630px; overflow-y: auto;">
 					<table class="table table-hover dataTable no-footer" style="margin-bottom: 0;">
 						<thead>
-							<th class="w140">日付</th>
-							<th class="w150">コース内容</th>
-							<th class="w60"></th>
-							<th class="w70">出勤</th>
-							<th class="w70">退勤</th>
-							<th class="w100">中抜け時間</th>
-							<th class="w70">ステータス</th>
-							<th class="w200">備考</th>
+							<tr>
+								<th class="w140">日付</th>
+								<th class="w140">コース内容</th>
+								<th class="w60"></th>
+								<th class="w180" colspan="3">出勤</th>
+								<th class="w180" colspan="3">退勤</th>
+								<th class="w100">中抜け時間</th>
+								<th class="w70">ステータス</th>
+								<th class="w140">備考</th>
+							</tr>
 						</thead>
 						<tbody>
 
@@ -62,60 +63,58 @@
 									</th:block>
 
 									<td class="w140">[[${dailyAttendanceForm.dispTrainingDate}]]</td>
-									<td class="w150">[[${dailyAttendanceForm.sectionName}]]</td>
+									<td class="w140">[[${dailyAttendanceForm.sectionName}]]</td>
 									<td class="w60">
 										<button type="button" class="btn btn-success default-button"
 											th:onclick="'setStandardHours(' + ${stat.index} + ')'">定時</button>
 									</td>
-									<td class="w150">
-										<div style="display: flex; gap: 5px;">
-											<select th:name="|attendanceList[${stat.index}].trainingStartTimeHour|"
-												th:id="'startHour_' + ${stat.index}" class="form-control"
-												th:with="errorFieldName=|attendanceList[${stat.index}].trainingStartTimeHour|"
-												th:classappend="${errorFields != null and #lists.contains(errorFields, errorFieldName) ? ' error-highlight' : ''}"
-												style="width: 48%; display: inline-block;">
-												<option th:each="hour : ${attendanceForm.workHour}"
-													th:value="${hour.key}" th:text="${hour.value}"
-													th:selected="${hour.key == dailyAttendanceForm.trainingStartTimeHour}">
-												</option>
-											</select>:
-											<select th:name="|attendanceList[${stat.index}].trainingStartTimeMinute|"
-												th:id="'startMinute_' + ${stat.index}" class="form-control"
-												th:with="errorFieldName=|attendanceList[${stat.index}].trainingStartTimeMinute|"
-												th:classappend="${errorFields != null and #lists.contains(errorFields, errorFieldName) ? ' error-highlight' : ''}"
-												style="width: 48%; display: inline-block;">
-												<option th:each="minute : ${attendanceForm.workMinute}"
-													th:value="${minute.key}" th:text="${minute.value}"
-													th:selected="${minute.key == dailyAttendanceForm.trainingStartTimeMinute}">
-												</option>
-											</select>
-										</div>
+									<td class="w70">
+										<select th:name="|attendanceList[${stat.index}].trainingStartTimeHour|"
+											th:id="'startHour_' + ${stat.index}" class="form-control"
+											th:with="errorFieldName=|attendanceList[${stat.index}].trainingStartTimeHour|"
+											th:classappend="${errorFields != null and #lists.contains(errorFields, errorFieldName) ? ' error-highlight' : ''}">
+											<option th:each="hour : ${attendanceForm.workHour}" th:value="${hour.key}"
+												th:text="${hour.value}"
+												th:selected="${hour.key == dailyAttendanceForm.trainingStartTimeHour}">
+											</option>
+										</select>
 									</td>
-									<td class="w150">
-										<div style="display: flex; gap: 5px;">
-											<select th:name="|attendanceList[${stat.index}].trainingEndTimeHour|"
-												th:id="'endHour_' + ${stat.index}" class="form-control"
-												th:with="errorFieldName=|attendanceList[${stat.index}].trainingEndTimeHour|"
-												th:classappend="${errorFields != null and #lists.contains(errorFields, errorFieldName) ? ' error-highlight' : ''}"
-												style="width: 48%; display: inline-block;">
-												<option th:each="hour : ${attendanceForm.workHour}"
-													th:value="${hour.key}" th:text="${hour.value}"
-													th:selected="${hour.key == dailyAttendanceForm.trainingEndTimeHour}">
-												</option>
-											</select>:
-											<select th:name="|attendanceList[${stat.index}].trainingEndTimeMinute|"
-												th:id="'endMinute_' + ${stat.index}" class="form-control"
-												th:with="errorFieldName=|attendanceList[${stat.index}].trainingEndTimeMinute|"
-												th:classappend="${errorFields != null and #lists.contains(errorFields, errorFieldName) ? ' error-highlight' : ''}"
-												style="width: 48%; display: inline-block;">
-												<option th:each="minute : ${attendanceForm.workMinute}"
-													th:value="${minute.key}" th:text="${minute.value}"
-													th:selected="${minute.key == dailyAttendanceForm.trainingEndTimeMinute}">
-												</option>
-											</select>
-										</div>
+									<td style="text-align: center; width: 20px;">:</td>
+									<td class="w70">
+										<select th:name="|attendanceList[${stat.index}].trainingStartTimeMinute|"
+											th:id="'startMinute_' + ${stat.index}" class="form-control"
+											th:with="errorFieldName=|attendanceList[${stat.index}].trainingStartTimeMinute|"
+											th:classappend="${errorFields != null and #lists.contains(errorFields, errorFieldName) ? ' error-highlight' : ''}">
+											<option th:each="minute : ${attendanceForm.workMinute}"
+												th:value="${minute.key}" th:text="${minute.value}"
+												th:selected="${minute.key == dailyAttendanceForm.trainingStartTimeMinute}">
+											</option>
+										</select>
 									</td>
-									<td class="w100">
+									<td class="w70">
+										<select th:name="|attendanceList[${stat.index}].trainingEndTimeHour|"
+											th:id="'endHour_' + ${stat.index}" class="form-control"
+											th:with="errorFieldName=|attendanceList[${stat.index}].trainingEndTimeHour|"
+											th:classappend="${errorFields != null and #lists.contains(errorFields, errorFieldName) ? ' error-highlight' : ''}">
+											<option th:each="hour : ${attendanceForm.workHour}" th:value="${hour.key}"
+												th:text="${hour.value}"
+												th:selected="${hour.key == dailyAttendanceForm.trainingEndTimeHour}">
+											</option>
+										</select>
+									</td>
+									<td style="text-align: center; width: 20px;">:</td>
+									<td class="w70">
+										<select th:name="|attendanceList[${stat.index}].trainingEndTimeMinute|"
+											th:id="'endMinute_' + ${stat.index}" class="form-control"
+											th:with="errorFieldName=|attendanceList[${stat.index}].trainingEndTimeMinute|"
+											th:classappend="${errorFields != null and #lists.contains(errorFields, errorFieldName) ? ' error-highlight' : ''}">
+											<option th:each="minute : ${attendanceForm.workMinute}"
+												th:value="${minute.key}" th:text="${minute.value}"
+												th:selected="${minute.key == dailyAttendanceForm.trainingEndTimeMinute}">
+											</option>
+										</select>
+									</td>
+									<td class="w80">
 										<select th:name="|attendanceList[${stat.index}].blankTime|" class="form-control"
 											th:with="errorFieldName=|attendanceList[${stat.index}].blankTime|"
 											th:classappend="${errorFields != null and #lists.contains(errorFields, errorFieldName) ? ' error-highlight' : ''}">
@@ -126,7 +125,7 @@
 										</select>
 									</td>
 									<td class="w70">[[${dailyAttendanceForm.statusDispName}]]</td>
-									<td class="w200">
+									<td class="w140">
 										<input type="text" th:name="|attendanceList[${stat.index}].note|"
 											th:value="${dailyAttendanceForm.note}" class="form-control"
 											th:with="errorFieldName=|attendanceList[${stat.index}].note|"
@@ -186,6 +185,16 @@
 			background-color: #ffcccc !important;
 			border: 2px solid #ff0000 !important;
 			box-shadow: none !important;
+		}
+
+		/* モック画面準拠の列幅調整 */
+		.w180 {
+			width: 180px;
+		}
+
+		/* テーブルのセル調整 */
+		table td {
+			vertical-align: middle;
 		}
 	</style>
 </body>
