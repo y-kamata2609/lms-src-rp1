@@ -20,7 +20,6 @@
 	</th:block>
 
 	<div th:if="${error}" class="text-danger" style="margin-bottom: 20px;">
-		<strong>*</strong>
 		<span th:text="${error}" style="white-space: pre-line;"></span>
 	</div>
 
@@ -129,7 +128,7 @@
 										<input type="text" th:name="|attendanceList[${stat.index}].note|"
 											th:value="${dailyAttendanceForm.note}" class="form-control"
 											th:with="errorFieldName=|attendanceList[${stat.index}].note|"
-											th:classappend="${errorFields != null and #lists.contains(errorFields, errorFieldName) ? ' error-highlight' : ''}"></input>
+											th:classappend="${errorFields != null and #lists.contains(errorFields, errorFieldName) ? ' error-highlight' : ''}">
 									</td>
 								</tr>
 							</th:block>
@@ -151,11 +150,11 @@
 	</div>
 	<script>
 		function setStandardHours(index) {
-			// 出勤時間を09:00に設定（Integer型対応）
+			// 出勤時間を09:00に設定
 			document.getElementById('startHour_' + index).value = '9';
 			document.getElementById('startMinute_' + index).value = '0';
 
-			// 退勤時間を18:00に設定（Integer型対応）
+			// 退勤時間を18:00に設定
 			document.getElementById('endHour_' + index).value = '18';
 			document.getElementById('endMinute_' + index).value = '0';
 		}
@@ -179,7 +178,7 @@
 			box-shadow: none !important;
 		}
 
-		/* レイアウトテンプレートに対抗するため詳細度を上げる */
+
 		body .form-control.error-highlight,
 		table .form-control.error-highlight {
 			background-color: #ffcccc !important;
@@ -187,12 +186,11 @@
 			box-shadow: none !important;
 		}
 
-		/* モック画面準拠の列幅調整 */
 		.w180 {
 			width: 180px;
 		}
 
-		/* テーブルのセル調整 */
+
 		table td {
 			vertical-align: middle;
 		}

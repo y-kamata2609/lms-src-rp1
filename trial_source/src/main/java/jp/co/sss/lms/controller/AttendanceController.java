@@ -146,7 +146,7 @@ public class AttendanceController {
 	public String complete(AttendanceForm attendanceForm, Model model, BindingResult result)
 			throws ParseException {
 
-		// task27: 入力チェック実行
+		//入力チェック実行
 		String validationError = studentAttendanceService.validateAttendanceForm(attendanceForm);
 
 		if (validationError != null) {

@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -216,7 +217,6 @@ public class StudentAttendanceService {
 		attendanceForm.setUserName(loginUserDto.getUserName());
 		attendanceForm.setLeaveFlg(loginUserDto.getLeaveFlg());
 		attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
-		// 設計書準拠のメソッド名に変更
 		attendanceForm.setWorkHour(attendanceUtil.getHourMap());
 		attendanceForm.setWorkMinute(attendanceUtil.getMinuteMap());
 		// 途中退校している場合のみ設定
@@ -248,7 +248,6 @@ public class StudentAttendanceService {
 			dailyAttendanceForm.setDispTrainingDate(dateUtil
 					.dateToString(attendanceManagementDto.getTrainingDate(), "yyyy年M月d日(E)"));
 			dailyAttendanceForm.setStatusDispName(attendanceManagementDto.getStatusDispName());
-			// 設計書準拠のメソッド名に変更（戻り値Integer型）
 			dailyAttendanceForm.setTrainingStartTimeHour(
 					attendanceUtil.getHour(attendanceManagementDto.getTrainingStartTime()));
 			dailyAttendanceForm.setTrainingStartTimeMinute(
@@ -283,7 +282,7 @@ public class StudentAttendanceService {
 		Date date = new Date();
 		for (DailyAttendanceForm dailyAttendanceForm : attendanceForm.getAttendanceList()) {
 
-			// 時分を結合（設計書外の処理だが、HTML画面との連携で必要）
+			// 時分を結合
 			combineTrainingTime(dailyAttendanceForm);
 
 			// 更新用エンティティ作成
@@ -343,8 +342,6 @@ public class StudentAttendanceService {
 		return messageUtil.getMessage(Constants.PROP_KEY_ATTENDANCE_UPDATE_NOTICE);
 	}
 
-	
-
 	/**
 	 * 過去の未入力が存在するかを判定
 	 * API設計書準拠：データベースでCOUNT(*)実行
@@ -360,7 +357,7 @@ public class StudentAttendanceService {
 	}
 
 	/**
-	 * 勤怠フォームの入力チェック（task27）
+	 * 勤怠フォームの入力チェック
 	 * 
 	 * @param attendanceForm 勤怠フォーム
 	 * @return エラーメッセージ（エラーなしの場合はnull）
@@ -478,10 +475,14 @@ public class StudentAttendanceService {
 			}
 		}
 
-		// エラーがある場合、エラー情報をAttendanceFormに設定
+		// エラーがある場合、各メッセージの先頭に*を付与
 		if (!errorMessages.isEmpty()) {
 			attendanceForm.setErrorFields(errorFields);
-			return String.join("\n", errorMessages);
+			// 各メッセージの先頭に*を付与
+			List<String> prefixedMessages = errorMessages.stream()
+					.map(message -> "* " + message)
+					.collect(Collectors.toList());
+			return String.join("\n", prefixedMessages);
 		}
 
 		return null; // エラーなし
@@ -525,7 +526,6 @@ public class StudentAttendanceService {
 
 	/**
 	 * 時分を結合してhh:mm形式の文字列を作成する
-	 * HTML画面との連携で必要な処理
 	 * 
 	 * @param dailyForm 日次勤怠フォーム
 	 */
